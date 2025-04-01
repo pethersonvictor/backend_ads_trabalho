@@ -1,66 +1,55 @@
-// Carregar as variáveis de ambiente do arquivo .env
-require('dotenv').config();
-
-// Express é importado
+//Express é importado
 const express = require('express');
-const mongoose = require('mongoose');
 
-// App é criada e inicia usando express
+//App é criada e inicia usando express
 const app = express();
 
-// Modelo do filme (Salvando os filmes no MongoDB)
-const Filme = mongoose.model('Filme', new mongoose.Schema({
-    titulo: { type: String, required: true }
-}));
+//Cria uma lista de livros
+const filmes = ['O Poderoso Chefão', 'A Espera de um Milagre', 'O Senhor dos Anéis'];
 
-// Conectar com banco de dados MongoDB usando a URL do .env
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }, function(err) {
-  if (err) {
-    console.error('Erro ao conectar no MongoDB:', err);
-  } else {
-    console.log('Conectado ao MongoDB');
-  }
-});
-
-// JSON no Body
+//JSON no Body
 app.use(express.json());
 
-// Endpoint GET - Todos os filmes
+//Endpoint get - todos os filmes
 app.get('/filmes', function(req, res) {
-  Filme.find({}, function(err, filmes) {
-    if (err) {
-      return res.status(500).send('Erro ao buscar filmes');
-    }
-    res.json(filmes);
-  });
+    res.send(filmes);
 });
 
-// Endpoint GET - Filme específico
+//Endpoint get - filme especifico
 app.get('/filmes/:id', function(req, res) {
-  const id = req.params.id;
-  Filme.findById(id, function(err, filme) {
-    if (err || !filme) {
-      return res.status(404).send('Filme não encontrado');
+    const id = req.params.id;
+    const filme = filmes[id - 1]; // Acessa o filme pela posição do array
+
+    if (!filme) {
+        return res.status(404).send('Filme não encontrado');
     }
+
     res.send(filme);
-  });
 });
 
-// Endpoint POST - Adicionar novo filme
+//Endpoint post - adicionar novo filme
 app.post('/filmes', function(req, res) {
-  const body = req.body;
-  const novoFilme = new Filme({
-    titulo: body.titulo
-  });
+    const body = req.body;
+    const novoFilme = body.titulo;
 
-  novoFilme.save(function(err) {
-    if (err) {
-      return res.status(500).send('Erro ao adicionar filme');
+    filmes.push(novoFilme); 
+
+    res.send('Filme adicionado com sucesso: ' + novoFilme);
+});
+
+//Endpoint delete - excluir filme
+app.delete('/filmes/:id', function(req, res) {
+    const id = req.params.id;
+    delete filmes[id - 1]; 
+
+    if (!filmes[id - 1]) {
+        return res.status(404).send('Filme não encontrado');
     }
-    res.status(201).send('Filme adicionado com sucesso: ' + novoFilme.titulo);
-  });
+
+    res.send('Filme removido com sucesso: ' + filmes[id - 1]);
+
 });
 
 app.listen(3000, function() {
-  console.log('Servidor rodando em http://localhost:3000');
+    console.log('Servidor rodando em http://localhost:3000');
 });
