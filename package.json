@@ -15,7 +15,9 @@
   "author": "Grupo Brids",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "mongoose": "^8.13.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
